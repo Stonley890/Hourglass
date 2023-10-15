@@ -3,7 +3,6 @@ io/github/stonley890/hourglass/listeners/ListenPlayerDropItem$1.class
 io/github/stonley890/hourglass/listeners/ListenPlayerToggleSneak.class
 io/github/stonley890/hourglass/listeners/ListenPlayerDropItem.class
 io/github/stonley890/hourglass/Hourglass.class
-io/github/stonley890/hourglass/Hourglass$2.class
 io/github/stonley890/hourglass/protocol/EntityData.class
 io/github/stonley890/hourglass/Ability.class
 io/github/stonley890/hourglass/listeners/ListenEntityToggleGlide.class
@@ -12,7 +11,6 @@ io/github/stonley890/hourglass/commands/Abilities.class
 io/github/stonley890/hourglass/player/PlayerUtility.class
 io/github/stonley890/hourglass/Hourglass$1.class
 io/github/stonley890/hourglass/listeners/ListenProjectileLaunch.class
-io/github/stonley890/hourglass/protocol/PacketSending.class
 io/github/stonley890/hourglass/listeners/ListenEntityTargetLivingEntity.class
 io/github/stonley890/hourglass/listeners/ListenPlayerRespawn.class
 io/github/stonley890/hourglass/listeners/ListenPlayerDeath.class

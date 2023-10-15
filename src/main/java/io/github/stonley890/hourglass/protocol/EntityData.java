@@ -24,10 +24,10 @@ public enum EntityData {
     }
 
     public byte setBit(byte bits) {
-        return (byte) ((byte) bits | this.bitMask);
+        return (byte) (bits | this.bitMask);
     }
 
     public byte unsetBit(byte bits) {
-        return (byte) ((byte) bits & ~this.bitMask);
+        return (byte) (bits & ~this.bitMask);
     }
 }

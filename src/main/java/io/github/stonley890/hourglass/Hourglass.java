@@ -7,6 +7,8 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import io.github.stonley890.hourglass.commands.Abilities;
@@ -16,11 +18,13 @@ import io.github.stonley890.hourglass.player.PlayerUtility;
 import io.github.stonley890.hourglass.protocol.EntityData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.minecraft.network.protocol.Packet;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -225,13 +229,112 @@ public final class Hourglass extends JavaPlugin {
 
                     // Extrasensory
                     if (memory.getAbility(extrasensory) == 1) {
-                        for (Entity entity : player.getNearbyEntities(20, 20, 20)) {
-                            if (entity instanceof Sheep) {
+                        // glowIds.clear();
+                        if (player.isSneaking()) {
+                            for (Entity entity : Bukkit.selectEntities(player, "@e[distance=0..20]")) {
 
-                                glowIds.add(entity.getEntityId());
+                                entity.setCustomName(String.valueOf(new Random().nextInt()));
+                                // glowIds.add(entity.getEntityId());
+
+                                PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
+
+                                final WrappedDataWatcher dataWatcher = WrappedDataWatcher.getEntityWatcher(entity).deepClone();
+                                dataWatcher.setEntity(entity);
+                                packet.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
+
+                                final List<WrappedWatchableObject> metadata = packet.getWatchableCollectionModifier().read(0); //dataWatcher.getWatchableObjects();
+                                WrappedWatchableObject bitMaskContainer = metadata.stream().filter(obj -> obj.getIndex() == 0).findAny().orElse(null);
+                                if (bitMaskContainer == null) return;
+                                byte bitMask = (byte) bitMaskContainer.getValue();
+
+                                Bukkit.getLogger().info("INITIAL: " + bitMask);
+                                Bukkit.getLogger().info("GLOWING: " + EntityData.GLOWING.getBitMask());
+                                Bukkit.getLogger().info("FINAL: " + (bitMask | EntityData.GLOWING.getBitMask()));
+                                bitMask = EntityData.GLOWING.setBit(bitMask);
+
+                                bitMaskContainer.setValue(bitMask);
+
+                                metadata.set(0, bitMaskContainer);
+
+                                packet.getWatchableCollectionModifier().write(0, metadata);
+
+                                /*
+                                try {
+
+                                    final List<WrappedDataValue> wrappedDataValueList = new ArrayList<>();
+
+                                    for (final WrappedWatchableObject entry : dataWatcher.getWatchableObjects()) {
+                                        if (entry == null) continue;
+
+                                        final WrappedDataWatcher.WrappedDataWatcherObject watcherObject = entry.getWatcherObject();
+                                        wrappedDataValueList.add(
+                                                new WrappedDataValue(
+                                                        watcherObject.getIndex(),
+                                                        watcherObject.getSerializer(),
+                                                        entry.getRawValue()
+                                                )
+                                        );
+                                    }
+
+                                    packet.getDataValueCollectionModifier().write(0, wrappedDataValueList);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    packet.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
+                                }
+                                 */
+
+
+                                ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
 
                             }
+                        } else {
+                            /*
+                            for (Entity entity : Bukkit.selectEntities(player, "@e[distance=0..]")) {
+                                entity.setCustomName(String.valueOf(new Random().nextInt()));
+
+                                PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
+                                final WrappedDataWatcher dataWatcher = WrappedDataWatcher.getEntityWatcher(entity).deepClone();
+                                dataWatcher.setEntity(entity);
+                                final List<WrappedWatchableObject> metadata = dataWatcher.getWatchableObjects();
+                                WrappedWatchableObject bitMaskContainer = metadata.stream().filter(obj -> obj.getIndex() == 0).findAny().orElse(null);
+                                if (bitMaskContainer == null) return;
+                                byte bitMask = (byte) bitMaskContainer.getValue();
+
+                                bitMask = EntityData.GLOWING.unsetBit(bitMask);
+
+                                bitMaskContainer.setValue(bitMask);
+
+                                try {
+
+                                    final List<WrappedDataValue> wrappedDataValueList = new ArrayList<>();
+
+                                    for (final WrappedWatchableObject entry : dataWatcher.getWatchableObjects()) {
+                                        if (entry == null) continue;
+
+                                        final WrappedDataWatcher.WrappedDataWatcherObject watcherObject = entry.getWatcherObject();
+                                        wrappedDataValueList.add(
+                                                new WrappedDataValue(
+                                                        watcherObject.getIndex(),
+                                                        watcherObject.getSerializer(),
+                                                        entry.getRawValue()
+                                                )
+                                        );
+                                    }
+
+                                    packet.getDataValueCollectionModifier().write(0, wrappedDataValueList);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    packet.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
+                                }
+
+                                ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
+                            }
+                            */
                         }
+
+
                     }
 
                 }
@@ -241,39 +344,67 @@ public final class Hourglass extends JavaPlugin {
         // Run repeat task once per second
         Bukkit.getScheduler().runTaskTimer(this, repeatTask, 1, 20);
 
+        /*
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this, PacketType.Play.Server.ENTITY_METADATA) {
             @Override
             public void onPacketSending(PacketEvent event) {
-                PacketContainer packet = event.getPacket().deepClone(); // Deep clone to avoid unwanted side effects.
 
-                int entityId = event.getPacket().getIntegers().readSafely(0); // Get the entity id.
-                if (entityId != event.getPlayer().getEntityId()) {
-                    List<WrappedWatchableObject> metadata = packet.getWatchableCollectionModifier().read(0);
-                    WrappedWatchableObject bitMaskContainer = metadata.stream().filter(obj -> obj.getIndex() == 0).findAny().orElse(null);
+                if(event.isCancelled()) return;
+                if(event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA) return;
 
 
+                final PacketContainer packet = event.getPacket();
+                final Entity entity = packet.getEntityModifier(event).read(0);
 
-                    if (bitMaskContainer == null) return;
-                    byte bitMask = (byte) bitMaskContainer.getValue();
+                if(entity == null) return;
+
+                final WrappedDataWatcher dataWatcher =
+                        WrappedDataWatcher.getEntityWatcher(entity).deepClone();
+
+                final List<WrappedWatchableObject> metadata = dataWatcher.getWatchableObjects();
+                WrappedWatchableObject bitMaskContainer = metadata.stream().filter(obj -> obj.getIndex() == 0).findAny().orElse(null);
+                if (bitMaskContainer == null) return;
+                byte bitMask = (byte) bitMaskContainer.getValue();
+
+                if (PlayerUtility.getPlayerMemory(event.getPlayer()).getAbility(extrasensory) > 0 && glowIds.contains(entity.getEntityId())) {
                     bitMask = EntityData.GLOWING.setBit(bitMask);
-                    bitMask = EntityData.ON_FIRE.unsetBit(bitMask);
-
-                    bitMaskContainer.setValue(bitMask);
-
-                    event.setPacket(packet); // Set packet as the clone instead of original.
                 }
+
+                bitMaskContainer.setValue(bitMask);
+
+                try {
+
+                    final List<WrappedDataValue> wrappedDataValueList = new ArrayList<>();
+
+                    for (final WrappedWatchableObject entry : dataWatcher.getWatchableObjects()) {
+                        if (entry == null) continue;
+
+                        final WrappedDataWatcher.WrappedDataWatcherObject watcherObject = entry.getWatcherObject();
+                        wrappedDataValueList.add(
+                                new WrappedDataValue(
+                                        watcherObject.getIndex(),
+                                        watcherObject.getSerializer(),
+                                        entry.getRawValue()
+                                )
+                        );
+                    }
+
+                    packet.getDataValueCollectionModifier().write(0, wrappedDataValueList);
+
+                } catch (Exception e) {
+                    packet.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
+                }
+
+                event.setPacket(packet);
+
             }
         });
-    }
 
-
-    public void setGlow(Player player, Entity target) {
-
-
-
+         */
     }
 
     public static Hourglass getPlugin() {
         return plugin;
     }
+
 }
