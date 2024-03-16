@@ -22,10 +22,7 @@ import java.util.List;
 public class Abilities implements CommandExecutor {
 
     List<ChatColor> colors = new ArrayList<>();
-    public static List<String> abilityNames = new ArrayList<>();
     public static List<Ability> abilities = new ArrayList<>();
-
-
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -48,9 +45,9 @@ public class Abilities implements CommandExecutor {
                     int abilityIndex = Integer.parseInt(args[0]);
                     int abilityValue = Integer.parseInt(args[1]);
 
-                    if (abilityValue <= abilities.get(abilityIndex).levels) {
+                    if (abilityValue <= abilities.get(abilityIndex).getLevels()) {
                         memory.setAbility(abilityIndex, abilityValue);
-                        player.sendMessage(ChatColor.RED + abilities.get(abilityIndex).name + ChatColor.WHITE + " set to level " + ChatColor.GOLD + abilityValue);
+                        player.sendMessage(ChatColor.RED + abilities.get(abilityIndex).getName() + ChatColor.WHITE + " set to level " + ChatColor.GOLD + abilityValue);
                     }
                 } catch (NumberFormatException e) {
                     // Ints could not be parsed
@@ -69,25 +66,24 @@ public class Abilities implements CommandExecutor {
                 ComponentBuilder levels = new ComponentBuilder();
 
                 // Create levels with ClickEvents
-                for (int i = 0; i <= ability.levels; i++) {
+                for (int i = 0; i <= ability.getLevels(); i++) {
                     // Underline the value that matches the player's ability level (from PlayerMemory)
                     levels.append(String.valueOf(i)).color(colors.get(i)).underlined(memory.getAbility(abilities.indexOf(ability)) == i).event(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND, "/abilities " + abilities.indexOf(ability) + " " + i
                     ));
-                    if (i != ability.levels) {
+                    if (i != ability.getLevels()) {
                         levels.append(" | ").color(ChatColor.DARK_GRAY).underlined(false);
                     }
                 }
 
                 // Build page
                 component = new ComponentBuilder()
-                        .append(ability.name).color(ChatColor.RED).bold(true)
-                        .append("\n").bold(false)
-                        .append(ability.lore).color(ChatColor.DARK_AQUA).italic(true)
-                        .append("\n[ ").color(ChatColor.DARK_GRAY).italic(false)
+                        .append(ability.getName()).color(ChatColor.RED).bold(true)
+                        .append("\n[ ").bold(false).color(ChatColor.DARK_GRAY).italic(false)
                         .append(levels.create())
                         .append(" ]\n").color(ChatColor.DARK_GRAY).underlined(false).event((ClickEvent) null)
-                        .append(ability.details)
+                        .append(ability.getLore()).color(ChatColor.DARK_AQUA).italic(true).append("\n")
+                        .append(ability.getDetails())
                         .create();
 
                 meta.spigot().addPage(component);
@@ -102,7 +98,8 @@ public class Abilities implements CommandExecutor {
             // Set and open book gui
             gui.setItemMeta(meta);
             player.openBook(gui);
-            Ability.init(player);
+            Ability.reload(player);
+
         }
 
         return true;

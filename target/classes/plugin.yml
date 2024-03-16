@@ -3,7 +3,6 @@ version: '1.0-SNAPSHOT'
 main: io.github.stonley890.hourglass.Hourglass
 api-version: '1.20'
 author: Stonley890
-depend: [ ProtocolLib ]
 
 commands:
   abilities:
