@@ -5,6 +5,7 @@ package io.github.stonley890.hourglass;
 import io.github.stonley890.hourglass.abilities.*;
 import io.github.stonley890.hourglass.commands.Abilities;
 import io.github.stonley890.hourglass.listeners.ListenPlayerRespawn;
+import io.github.stonley890.hourglass.listeners.ListenPlayerUse;
 import io.github.stonley890.hourglass.listeners.PlayerJoin;
 import io.github.stonley890.hourglass.listeners.PlayerLeave;
 import org.bukkit.Bukkit;
@@ -39,7 +40,6 @@ public final class Hourglass extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Adrift(), this);
         getServer().getPluginManager().registerEvents(new Bound(), this);
         getServer().getPluginManager().registerEvents(new ArmoredWings(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerRespawn(), this);
         getServer().getPluginManager().registerEvents(new EnderiansEmbrace(), this);
         getServer().getPluginManager().registerEvents(new EnderiansPacifist(), this);
         getServer().getPluginManager().registerEvents(new EnderiansPacifist(), this);
@@ -50,6 +50,8 @@ public final class Hourglass extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TenderTouch(), this);
         getServer().getPluginManager().registerEvents(new UnfathomableLuck(), this);
 
+        getServer().getPluginManager().registerEvents(new ListenPlayerUse(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerRespawn(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoin(), this);
         getServer().getPluginManager().registerEvents(new PlayerLeave(), this);
 
